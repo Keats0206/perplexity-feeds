@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button'
 
 interface SearchBarProps {
   initialQuery: string
+  compact?: boolean
 }
 
-export default function SearchBar({ initialQuery }: SearchBarProps) {
+export default function SearchBar({ initialQuery, compact = false }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -35,12 +36,12 @@ export default function SearchBar({ initialQuery }: SearchBarProps) {
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Ask anything..."
-        rows={3}
-        className="w-full resize-none rounded-2xl bg-transparent px-4 pt-3 pb-10 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none"
+        rows={compact ? 1 : 3}
+        className={`w-full resize-none rounded-2xl bg-transparent px-4 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none ${compact ? 'py-2.5 pr-12' : 'pt-3 pb-10'}`}
       />
       {/* Bottom bar */}
-      <div className="absolute bottom-2.5 left-3 right-2.5 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground/50">⏎ to search</span>
+      <div className={`${compact ? 'absolute right-2 top-1/2 -translate-y-1/2' : 'absolute bottom-2.5 left-3 right-2.5 flex items-center justify-between'}`}>
+        {!compact && <span className="text-xs text-muted-foreground/50">⏎ to search</span>}
         <Button
           onClick={submit}
           size="icon-sm"

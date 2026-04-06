@@ -74,7 +74,7 @@ function DiscoveryState() {
   }, [])
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-8">
+    <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
       <div className="flex flex-col gap-8">
         {DISCOVERY_ROWS.map((query) => {
           const results = cache[query]
@@ -156,9 +156,10 @@ function MatchScore({ score }: { score: number }) {
 
 interface MomentViewerProps {
   results: MomentResult[] | null
+  searchError?: string | null
 }
 
-export default function MomentViewer({ results }: MomentViewerProps) {
+export default function MomentViewer({ results, searchError }: MomentViewerProps) {
   const [selectedIdx, setSelectedIdx] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -171,6 +172,7 @@ export default function MomentViewer({ results }: MomentViewerProps) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
+          {searchError && <p className="text-xs text-destructive mb-3">{searchError}</p>}
           <svg className="h-10 w-10 text-muted-foreground/30 mb-3 mx-auto" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" />
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35" />
@@ -202,7 +204,7 @@ export default function MomentViewer({ results }: MomentViewerProps) {
         <div
           className="flex flex-col w-full"
           style={{
-            transform: `translateY(calc(${-selectedIdx} * 100vh))`,
+            transform: `translateY(calc(${-selectedIdx} * 100dvh))`,
             transition: 'transform 380ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
@@ -214,13 +216,13 @@ export default function MomentViewer({ results }: MomentViewerProps) {
             return (
               <div
                 key={result.momentId}
-                className="shrink-0 overflow-y-auto px-8 py-6 flex flex-col items-center gap-4"
-                style={{ height: '100vh' }}
+                className="shrink-0 overflow-y-auto px-4 md:px-8 py-4 md:py-6 flex flex-col items-center gap-4"
+                style={{ height: '100dvh' }}
               >
                 {/* Portrait video */}
                 <div
                   className="relative w-full max-w-sm rounded-2xl overflow-hidden bg-black shadow-xl shrink-0"
-                  style={{ aspectRatio: '9/16', maxHeight: 'calc(100vh - 220px)' }}
+                  style={{ aspectRatio: '9/16', maxHeight: 'calc(100dvh - 200px)' }}
                 >
                   {isSelected && playing && result.signedVideoUrl ? (
                     <VideoPlayer
@@ -340,8 +342,8 @@ export default function MomentViewer({ results }: MomentViewerProps) {
         </div>
       </div>
 
-      {/* ── Right: mini stack ── */}
-      <div className="w-60 shrink-0 border-l border-border overflow-y-auto py-4 px-2 flex flex-col gap-1">
+      {/* ── Right: mini stack — desktop only ── */}
+      <div className="hidden md:flex w-60 shrink-0 border-l border-border overflow-y-auto py-4 px-2 flex-col gap-1">
         <p className="text-xs text-muted-foreground px-2 mb-2">Results</p>
         {results.map((r, i) => {
           const isActive = i === selectedIdx

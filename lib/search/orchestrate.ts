@@ -68,7 +68,7 @@ export async function searchMoments(query: string): Promise<MomentResult[]> {
   }
   const rows = Array.from(seen.values())
     .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 3)
+    .slice(0, 5)
 
   // 4. Fetch video storage paths for all matched videos (deduplicated)
   const videoIds = [...new Set(rows.map((r) => r.video_id))]
