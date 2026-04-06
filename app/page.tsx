@@ -2,6 +2,7 @@ import { searchMoments } from '@/lib/search/orchestrate'
 import SearchBar from '@/components/SearchBar'
 import MomentViewer from '@/components/MomentViewer'
 import ClearCacheButton from '@/components/ClearCacheButton'
+import Link from 'next/link'
 
 const SUGGESTIONS = [
   'how do I stop procrastinating every day',
@@ -38,10 +39,37 @@ export default async function Home({
   }
 
   return (
-    <div className="flex-1 flex h-screen overflow-hidden">
+    <div className="flex-1 flex flex-col md:flex-row h-[100dvh] md:h-screen overflow-hidden">
 
-      {/* ── Left panel ── */}
-      <div className="w-80 shrink-0 flex flex-col border-r border-border bg-sidebar">
+      {/* ── Mobile header ── */}
+      <div className="md:hidden shrink-0 flex items-center justify-between px-4 h-14 border-b border-border bg-sidebar">
+        {query ? (
+          <>
+            <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </Link>
+            <p className="text-sm font-medium text-foreground truncate max-w-[60%] text-center">{query}</p>
+            <div className="w-12" />
+          </>
+        ) : (
+          <>
+            <div>
+              <p className="text-base font-semibold tracking-tight text-foreground leading-none">perplexity</p>
+              <p className="text-xs font-medium text-primary mt-0.5 tracking-wide">feeds</p>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-right leading-snug">
+              built by<br />
+              <span className="font-medium text-foreground/70">peter keating</span>
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* ── Desktop left sidebar ── */}
+      <div className="hidden md:flex w-80 shrink-0 flex-col border-r border-border bg-sidebar">
 
         {/* Logo header */}
         <div className="px-5 pt-5 pb-4 border-b border-border flex items-end justify-between">
@@ -62,8 +90,6 @@ export default async function Home({
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Feed your curiosity without the algorithmic addictions.
               </p>
-
-              {/* Placeholder suggestions */}
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Try asking</p>
                 {SUGGESTIONS.map((s) => (
@@ -99,15 +125,20 @@ export default async function Home({
           )}
         </div>
 
-        {/* Search bar pinned to bottom */}
         <div className="px-4 pt-4 pb-2 border-t border-border bg-sidebar">
           <SearchBar initialQuery={query} />
           <ClearCacheButton />
         </div>
       </div>
 
-      {/* ── Center + right panels ── */}
-      <MomentViewer results={results} />
+      {/* ── Content ── */}
+      <MomentViewer results={results} searchError={searchError} />
+
+      {/* ── Mobile bottom search bar ── */}
+      <div className="md:hidden shrink-0 px-3 pt-3 pb-4 border-t border-border bg-sidebar">
+        <SearchBar initialQuery={query} compact />
+        <ClearCacheButton />
+      </div>
 
     </div>
   )
