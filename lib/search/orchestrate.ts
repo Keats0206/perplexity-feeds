@@ -41,12 +41,12 @@ export async function searchMoments(query: string): Promise<MomentResult[]> {
   // 1. Embed the query
   const embedding = await embedQuery(query)
 
-  // 2. Call the RPC
+  // 2. Call the RPC — fetch extra rows so deduplication leaves enough results
   const { data: rpcRows, error: rpcError } = await supabase.rpc(
     'match_video_moments',
     {
       query_embedding: embedding,
-      match_count: 10,
+      match_count: 30,
     }
   )
 
@@ -58,9 +58,19 @@ export async function searchMoments(query: string): Promise<MomentResult[]> {
     return []
   }
 
-  const rows = rpcRows as RpcRow[]
+  // 3. Deduplicate: keep only the highest-similarity moment per video
+  const seen = new Map<string, RpcRow>()
+  for (const row of rpcRows as RpcRow[]) {
+    const existing = seen.get(row.video_id)
+    if (!existing || row.similarity > existing.similarity) {
+      seen.set(row.video_id, row)
+    }
+  }
+  const rows = Array.from(seen.values())
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, 3)
 
-  // 3. Fetch video storage paths for all matched videos (deduplicated)
+  // 4. Fetch video storage paths for all matched videos (deduplicated)
   const videoIds = [...new Set(rows.map((r) => r.video_id))]
   const { data: videoRows, error: videoError } = await supabase
     .from('videos')
@@ -75,7 +85,7 @@ export async function searchMoments(query: string): Promise<MomentResult[]> {
     (videoRows as VideoRow[]).map((v) => [v.id, v])
   )
 
-  // 4. Generate signed URLs and normalize results
+  // 5. Generate signed URLs and normalize results
   const results: MomentResult[] = await Promise.all(
     rows.map(async (row) => {
       const video = videoMap.get(row.video_id)
